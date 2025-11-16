@@ -1,0 +1,66 @@
+import { Module } from '@nestjs/common';
+import { UsersModule } from './users/users.module';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { User } from './users/entities/user.entity';
+import { UsersResolver } from './users/users.resolver';
+import { AuthService } from './auth.service';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { config } from 'process';
+
+@Module({
+  imports: [
+    UsersModule,
+    MailerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return {
+          transport: {
+            host: configService.get<string>('EMAIL_HOST'),
+            auth: {
+              user: configService.get<string>('EMAIL_USER'),
+              pass: configService.get<string>('EMAIL_PASSWORD'),
+            },
+          },
+        };
+      },
+    }),
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      playground: false,
+      autoSchemaFile: 'src/schema.gql',
+      context: ({ req, res }) => ({ req, res }), // ← REQUIRED
+      plugins: [ApolloServerPluginLandingPageLocalDefault()],
+    }),
+
+    // Config the DB path
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true,
+    }),
+
+    // Config the real database to be visible to the typeORM
+    TypeOrmModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return {
+          type: 'postgres',
+          host: configService.get<string>('DB_HOST'),
+          port: configService.get('DB_PORT'),
+          username: configService.get<string>('DB_USER_NAME'),
+          password: configService.get<string>('DB_PASSWORD'),
+          database: 'airport_app',
+          entities: [User],
+          synchronize: true, // Be cautious about using synchronize in production
+          logging: true,
+        };
+      },
+    }),
+  ],
+  // controllers: [AppController],
+  providers: [UsersResolver],
+})
+export class AppModule {}

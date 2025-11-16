@@ -1,0 +1,64 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type User {
+  id: ID!
+  firstName: String!
+  lastName: String!
+  email: String!
+  isAdmin: Boolean!
+  password: String!
+  passwordResetToken: String
+  passwordResetTokenExpirationDate: DateTime
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type forgetPasswordResponse {
+  message: String!
+}
+
+type Query {
+  forgetPassword(resetPasswordDto: resetPasswordDto!): forgetPasswordResponse!
+  hello: String!
+}
+
+input resetPasswordDto {
+  email: String!
+}
+
+type Mutation {
+  signupUser(CreateUserInput: CreateUserInput!): User!
+  loginUser(LoginUserInput: LoginUserInput!): User!
+  updateUserInfo(UpdateUserInput: UpdateUserInput!, id: String!): User!
+  logoutUser(id: String!): Boolean!
+  resetPassword(forgetPassword: forgetPasswordDto!, token: String!): forgetPasswordResponse!
+}
+
+input CreateUserInput {
+  firstName: String!
+  lastName: String
+  email: String!
+  password: String!
+  isAdmin: Boolean
+}
+
+input LoginUserInput {
+  email: String!
+  password: String!
+}
+
+input UpdateUserInput {
+  email: String
+  firstName: String
+  lastName: String
+}
+
+input forgetPasswordDto {
+  email: String!
+  password: String!
+}

@@ -1,0 +1,90 @@
+import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
+import { UsersService } from './users.service';
+import { User } from './entities/user.entity';
+import { CreateUserInput } from './dtos/createUserInput.dto';
+import { AuthService } from 'src/auth.service';
+import { LoginUserInput } from './dtos/LoginUserInput.dto';
+import { UpdateUserInput } from './dtos/UpdateUserInput.dto';
+import { UseGuards } from '@nestjs/common';
+import { authGuard } from './guards/auth.guard';
+import { forgetPasswordResponse } from './dtos/forgetPasswordResponse.dto';
+import { resetPasswordDto } from './dtos/resetPassword.dto';
+import { forgetPasswordDto } from './dtos/forgetPassword.dto';
+
+@Resolver(() => User)
+export class UsersResolver {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly authService: AuthService,
+  ) {}
+
+  @Mutation(() => User)
+  async signupUser(
+    @Args('CreateUserInput') CreateUserInput: CreateUserInput,
+    @Context() context: any,
+  ) {
+    const newUser = await this.authService.createUser(CreateUserInput);
+    context.req.session.userId = newUser.id; // to check for another auth in the following requests
+    console.log('Session after signup:', context.req.session); // Check if userId is present here
+    return newUser;
+  }
+
+  @Mutation(() => User)
+  async loginUser(
+    @Args('LoginUserInput') LoginUserInput: LoginUserInput,
+    @Context() context: any,
+  ) {
+    const loggedInUser = await this.authService.loginUser(
+      LoginUserInput.email,
+      LoginUserInput.password,
+    );
+    context.req.session.userId = loggedInUser.id;
+    console.log(context.req.session.userId);
+    return loggedInUser;
+  }
+
+  @UseGuards(authGuard)
+  @Mutation(() => User)
+  updateUserInfo(
+    @Args('UpdateUserInput') UpdateUserInput: UpdateUserInput,
+    @Args('id') id: string,
+    @Context() context: any,
+  ) {
+    const session = context.req?.session;
+    return this.usersService.updateUserInfo(UpdateUserInput, id, session);
+  }
+
+  @UseGuards(authGuard)
+  @Mutation(() => Boolean)
+  logoutUser(@Context() context: any, @Args('id') id: string) {
+    const { session } = context.req;
+    return this.usersService.logoutUser(session, id);
+  }
+
+  @Query(() => forgetPasswordResponse)
+  async forgetPassword(
+    @Args('resetPasswordDto') resetPasswordBody: resetPasswordDto,
+  ) {
+    const token = await this.authService.generateRandomToken(
+      resetPasswordBody.email,
+    );
+
+    await this.usersService.sendMail(token, resetPasswordBody.email);
+    return {
+      message: 'Token Sent Successfully to your email, please check that',
+    };
+  }
+
+  @Mutation(() => forgetPasswordResponse)
+  async resetPassword(
+    @Args('forgetPassword') forgetPasswordBody: forgetPasswordDto,
+    @Args('token') token: string,
+  ) {
+    await this.authService.forgetPassword(forgetPasswordBody, token);
+    return { message: 'password Changed Successfully!' };
+  }
+  @Query(() => String)
+  hello(): string {
+    return 'Hello World!';
+  }
+}
