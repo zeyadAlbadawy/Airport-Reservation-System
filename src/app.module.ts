@@ -10,10 +10,13 @@ import { UsersResolver } from './users/users.resolver';
 import { AuthService } from './auth.service';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { config } from 'process';
+import { GoogleAuthModule } from './users/google-auth/google-auth.module';
+import { PassportModule } from '@nestjs/passport';
 
 @Module({
   imports: [
     UsersModule,
+    PassportModule.register({ session: true }), // to register the session with passport
     MailerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
@@ -59,6 +62,8 @@ import { config } from 'process';
         };
       },
     }),
+
+    GoogleAuthModule,
   ],
   // controllers: [AppController],
   providers: [UsersResolver],

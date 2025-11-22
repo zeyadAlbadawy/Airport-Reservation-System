@@ -6,29 +6,28 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
-  @Field((type) => ID)
+  @Field(() => ID)
   id: string;
 
-  @Column()
-  @Field(() => String)
-  @MinLength(2, { message: 'Name must have atleast 2 characters.' })
-  firstName: string;
+  @Column({ type: 'varchar', nullable: true })
+  @Field(() => String, { nullable: true })
+  firstName: string | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  @Field(() => String, { nullable: true })
+  lastName: string | null;
 
   @Column()
   @Field(() => String)
-  lastName: string;
-
-  @Column()
-  @Field()
   email: string;
 
   @Column({ type: 'boolean', default: false })
   @Field({ defaultValue: false })
-  isAdmin: Boolean;
+  isAdmin: boolean;
 
-  @Column()
-  @Field()
-  password: string;
+  @Column({ type: 'varchar', nullable: true })
+  @Field(() => String, { nullable: true }) // ← explicitly specify type
+  password: string | null;
 
   @Column({ type: 'varchar', nullable: true })
   @Field(() => String, { nullable: true })

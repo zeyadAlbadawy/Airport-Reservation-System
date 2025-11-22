@@ -10,6 +10,8 @@ import { authGuard } from './guards/auth.guard';
 import { forgetPasswordResponse } from './dtos/forgetPasswordResponse.dto';
 import { resetPasswordDto } from './dtos/resetPassword.dto';
 import { forgetPasswordDto } from './dtos/forgetPassword.dto';
+import { allAuthGuard } from './guards/allAuth.guard';
+import { GoogleAuthGuard } from './guards/googleAuth.guard';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -25,7 +27,6 @@ export class UsersResolver {
   ) {
     const newUser = await this.authService.createUser(CreateUserInput);
     context.req.session.userId = newUser.id; // to check for another auth in the following requests
-    console.log('Session after signup:', context.req.session); // Check if userId is present here
     return newUser;
   }
 
@@ -39,11 +40,10 @@ export class UsersResolver {
       LoginUserInput.password,
     );
     context.req.session.userId = loggedInUser.id;
-    console.log(context.req.session.userId);
     return loggedInUser;
   }
 
-  @UseGuards(authGuard)
+  @UseGuards(new allAuthGuard([new authGuard(), new GoogleAuthGuard()]))
   @Mutation(() => User)
   updateUserInfo(
     @Args('UpdateUserInput') UpdateUserInput: UpdateUserInput,

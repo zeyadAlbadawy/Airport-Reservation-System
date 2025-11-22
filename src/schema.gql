@@ -4,11 +4,11 @@
 
 type User {
   id: ID!
-  firstName: String!
-  lastName: String!
+  firstName: String
+  lastName: String
   email: String!
   isAdmin: Boolean!
-  password: String!
+  password: String
   passwordResetToken: String
   passwordResetTokenExpirationDate: DateTime
 }

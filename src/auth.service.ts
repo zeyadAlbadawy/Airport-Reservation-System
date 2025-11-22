@@ -12,7 +12,7 @@ import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
 import * as crypto from 'crypto';
 import { forgetPasswordDto } from './users/dtos/forgetPassword.dto';
-import e from 'express';
+import { userDetail } from './users/dtos/googleAuth/createUser.dto';
 
 const scrypt = promisify(_scrypt);
 
@@ -46,7 +46,7 @@ export class AuthService {
     const [User] = await this.userService.find(email);
     if (!User)
       throw new NotFoundException(`There is no user with the email ${email}`);
-    const [salt, hashedPassword] = User.password.split('.');
+    const [salt, hashedPassword] = User.password?.split('.')!;
     const newHashedPassword = (await scrypt(password, salt, 32)) as Buffer;
     if (hashedPassword !== newHashedPassword.toString('hex'))
       throw new BadRequestException(
@@ -97,5 +97,28 @@ export class AuthService {
 
     await this.userRepo.save(foundedUser);
     return;
+  }
+
+  // Google AUTH
+  async validateUserGoogleAuth(userDetail: userDetail) {
+    const foundedUser = await this.userRepo.findOne({
+      where: { email: userDetail.email },
+    });
+
+    console.log('there is a user founded');
+    if (foundedUser) return foundedUser;
+
+    console.log('no user found try to creating it');
+    const newUser = this.userRepo.create({
+      email: userDetail.email,
+      firstName: userDetail.displayName,
+    });
+
+    return this.userRepo.save(newUser);
+  }
+
+  async findUser(userId: string) {
+    const foundedUser = await this.userRepo.findOneBy({ id: userId });
+    return foundedUser;
   }
 }
