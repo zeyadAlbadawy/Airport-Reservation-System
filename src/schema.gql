@@ -7,10 +7,18 @@ type User {
   firstName: String
   lastName: String
   email: String!
-  isAdmin: Boolean!
+  role: Role!
   password: String
   passwordResetToken: String
   passwordResetTokenExpirationDate: DateTime
+}
+
+"""Available user roles"""
+enum Role {
+  USER
+  ADMIN
+  CREW
+  SECURITY
 }
 
 """
@@ -22,13 +30,54 @@ type forgetPasswordResponse {
   message: String!
 }
 
+type Flight {
+  id: ID!
+  flightNumber: Int!
+  departureAirport: String!
+  destinationAirport: String!
+  date: String!
+  departureTime: String!
+  arrivalTime: String!
+  airLine: String!
+  availableSeats: Int!
+}
+
+type FlightResponse {
+  message: String!
+}
+
+type FlightPaginationResponse {
+  flights: [Flight!]
+  total: Float!
+  lastPage: Float!
+  currentPage: Float!
+  perPage: Float!
+}
+
 type Query {
   forgetPassword(resetPasswordDto: resetPasswordDto!): forgetPasswordResponse!
   hello: String!
+  flights(flightFilter: FlightFilterDto!): FlightPaginationResponse!
 }
 
 input resetPasswordDto {
   email: String!
+}
+
+input FlightFilterDto {
+  page: Int! = 1
+  limit: Int! = 10
+  departureTime: String
+
+  """Filter by destination airport code"""
+  destinationAirport: String!
+  departureAirport: String!
+
+  """Filter by airline name"""
+  airLine: String
+
+  """Filter by departure date (YYYY-MM-DD)"""
+  date: String!
 }
 
 type Mutation {
@@ -37,6 +86,9 @@ type Mutation {
   updateUserInfo(UpdateUserInput: UpdateUserInput!, id: String!): User!
   logoutUser(id: String!): Boolean!
   resetPassword(forgetPassword: forgetPasswordDto!, token: String!): forgetPasswordResponse!
+  createFlight(CreateFlightInput: CreateFlightInput!): Flight!
+  updateFlight(id: String!, UpdateFlightInput: UpdateFlightInput!): Flight!
+  removeFlight(id: String!): FlightResponse!
 }
 
 input CreateUserInput {
@@ -61,4 +113,28 @@ input UpdateUserInput {
 input forgetPasswordDto {
   email: String!
   password: String!
+}
+
+input CreateFlightInput {
+  """Example field (placeholder)"""
+  flightNumber: Int!
+  departureAirport: String!
+  destinationAirport: String!
+  date: String!
+  departureTime: String!
+  arrivalTime: String!
+  airLine: String!
+  availableSeats: Int!
+}
+
+input UpdateFlightInput {
+  """Example field (placeholder)"""
+  flightNumber: Int
+  departureAirport: String
+  destinationAirport: String
+  date: String
+  departureTime: String
+  arrivalTime: String
+  airLine: String
+  availableSeats: Int
 }

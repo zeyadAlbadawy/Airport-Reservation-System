@@ -12,7 +12,6 @@ export class GoogleAuthGuard
     const request = context.switchToHttp().getRequest();
     await super.logIn(request);
     // console.log(request.session.passport.user.id);
-    console.log('google auth is called');
     return activate;
   }
 }

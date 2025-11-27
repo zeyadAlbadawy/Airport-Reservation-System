@@ -12,6 +12,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { config } from 'process';
 import { GoogleAuthModule } from './users/google-auth/google-auth.module';
 import { PassportModule } from '@nestjs/passport';
+import { FlightModule } from './flight/flight.module';
+import { Flight } from './flight/entities/flight.entity';
 
 @Module({
   imports: [
@@ -45,6 +47,8 @@ import { PassportModule } from '@nestjs/passport';
       isGlobal: true,
     }),
 
+    FlightModule,
+
     // Config the real database to be visible to the typeORM
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
@@ -56,7 +60,7 @@ import { PassportModule } from '@nestjs/passport';
           username: configService.get<string>('DB_USER_NAME'),
           password: configService.get<string>('DB_PASSWORD'),
           database: 'airport_app',
-          entities: [User],
+          entities: [User, Flight],
           synchronize: true, // Be cautious about using synchronize in production
           logging: true,
         };

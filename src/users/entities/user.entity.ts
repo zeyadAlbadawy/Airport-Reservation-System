@@ -1,6 +1,7 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { MinLength } from 'class-validator';
 import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Role } from '../enums/roles';
 
 @ObjectType()
 @Entity()
@@ -21,12 +22,16 @@ export class User {
   @Field(() => String)
   email: string;
 
-  @Column({ type: 'boolean', default: false })
-  @Field({ defaultValue: false })
-  isAdmin: boolean;
+  // @Column({ type: 'boolean', default: false })
+  // @Field({ defaultValue: false })
+  // isAdmin: boolean;
+
+  @Column({ type: 'enum', enum: Role, default: Role.USER })
+  @Field(() => Role, { defaultValue: Role.USER })
+  role: Role;
 
   @Column({ type: 'varchar', nullable: true })
-  @Field(() => String, { nullable: true }) // ← explicitly specify type
+  @Field(() => String, { nullable: true })
   password: string | null;
 
   @Column({ type: 'varchar', nullable: true })
