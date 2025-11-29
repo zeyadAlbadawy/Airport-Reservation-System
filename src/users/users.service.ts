@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { UpdateUserInput } from './dtos/UpdateUserInput.dto';
 import { MailerService } from '@nestjs-modules/mailer';
+import { Role } from './enums/roles';
 
 @Injectable()
 export class UsersService {
@@ -43,12 +44,14 @@ export class UsersService {
     lastName: string,
     email: string,
     password: string,
+    role: Role,
   ) {
     const newUser = this.userRepo.create({
       firstName,
       lastName,
       email,
       password,
+      role,
     });
     await this.userRepo.save(newUser);
     return newUser;
@@ -73,5 +76,13 @@ export class UsersService {
       throw new UnauthorizedException(`You are not allowed to do this action`);
     session.userId = undefined;
     return true;
+  }
+
+  async approveMembers(id: string) {
+    const foundedUser = await this.userRepo.findOneBy({ id });
+    if (!foundedUser)
+      throw new NotFoundException(`There is no user with an id of ${id}`);
+    foundedUser.approved = true;
+    return this.userRepo.save(foundedUser);
   }
 }

@@ -1,5 +1,6 @@
 import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { User } from 'src/users/entities/user.entity';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @ObjectType()
 @Entity()
@@ -39,4 +40,21 @@ export class Flight {
   @Column()
   @Field(() => Int)
   availableSeats: number;
+
+  // Relation must not have colum decorator the oneToMany or manyToOne Is Sufficient
+  @ManyToOne(() => User, (user) => user.ResponsibleFlights, {
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
+  @Field(() => User, { nullable: true })
+  responsibleUser?: User;
+
+  // For the passenger Booked Flights
+
+  @ManyToOne(() => User, (user) => user.bookedFlights, {
+    onDelete: 'CASCADE',
+    nullable: true,
+  })
+  @Field(() => User, { nullable: true })
+  bookedByUser?: User;
 }

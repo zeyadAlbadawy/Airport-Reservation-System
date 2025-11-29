@@ -2,15 +2,35 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Flight {
+  id: ID!
+  flightNumber: Int!
+  departureAirport: String!
+  destinationAirport: String!
+  date: String!
+  departureTime: String!
+  arrivalTime: String!
+  airLine: String!
+  availableSeats: Int!
+  responsibleUser: User
+  bookedByUser: User
+}
+
 type User {
   id: ID!
+  role: Role!
   firstName: String
   lastName: String
   email: String!
-  role: Role!
   password: String
   passwordResetToken: String
   passwordResetTokenExpirationDate: DateTime
+  passportId: String
+  nationality: String
+  employeeID: String
+  approved: Boolean!
+  ResponsibleFlights: [Flight!]
+  bookedFlights: [Flight!]
 }
 
 """Available user roles"""
@@ -28,18 +48,6 @@ scalar DateTime
 
 type forgetPasswordResponse {
   message: String!
-}
-
-type Flight {
-  id: ID!
-  flightNumber: Int!
-  departureAirport: String!
-  destinationAirport: String!
-  date: String!
-  departureTime: String!
-  arrivalTime: String!
-  airLine: String!
-  availableSeats: Int!
 }
 
 type FlightResponse {
@@ -81,22 +89,26 @@ input FlightFilterDto {
 }
 
 type Mutation {
-  signupUser(CreateUserInput: CreateUserInput!): User!
+  signupUser(createUserInput: CreateUserInput!): User!
   loginUser(LoginUserInput: LoginUserInput!): User!
   updateUserInfo(UpdateUserInput: UpdateUserInput!, id: String!): User!
   logoutUser(id: String!): Boolean!
   resetPassword(forgetPassword: forgetPasswordDto!, token: String!): forgetPasswordResponse!
+  approveMembers(id: String!): User!
   createFlight(CreateFlightInput: CreateFlightInput!): Flight!
   updateFlight(id: String!, UpdateFlightInput: UpdateFlightInput!): Flight!
   removeFlight(id: String!): FlightResponse!
 }
 
 input CreateUserInput {
+  role: Role!
   firstName: String!
   lastName: String
   email: String!
   password: String!
-  isAdmin: Boolean
+  passportId: String!
+  nationality: String!
+  employeeID: String!
 }
 
 input LoginUserInput {

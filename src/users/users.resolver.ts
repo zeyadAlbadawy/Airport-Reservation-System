@@ -6,12 +6,13 @@ import { AuthService } from 'src/auth.service';
 import { LoginUserInput } from './dtos/LoginUserInput.dto';
 import { UpdateUserInput } from './dtos/UpdateUserInput.dto';
 import { UseGuards } from '@nestjs/common';
-import { authGuard } from './guards/auth.guard';
 import { forgetPasswordResponse } from './dtos/forgetPasswordResponse.dto';
 import { resetPasswordDto } from './dtos/resetPassword.dto';
 import { forgetPasswordDto } from './dtos/forgetPassword.dto';
 import { allAuthGuard } from './guards/allAuth.guard';
 import { GoogleAuthGuard } from './guards/googleAuth.guard';
+import { authGuard } from './guards/auth.guard';
+import { AdminGuard } from './guards/adminAuth.guard';
 
 @Resolver(() => User)
 export class UsersResolver {
@@ -22,10 +23,10 @@ export class UsersResolver {
 
   @Mutation(() => User)
   async signupUser(
-    @Args('CreateUserInput') CreateUserInput: CreateUserInput,
+    @Args('createUserInput') createUserInput: CreateUserInput,
     @Context() context: any,
   ) {
-    const newUser = await this.authService.createUser(CreateUserInput);
+    const newUser = await this.authService.createUser(createUserInput);
     context.req.session.userId = newUser.id; // to check for another auth in the following requests
     return newUser;
   }
@@ -82,6 +83,15 @@ export class UsersResolver {
   ) {
     await this.authService.forgetPassword(forgetPasswordBody, token);
     return { message: 'password Changed Successfully!' };
+  }
+
+  @UseGuards(
+    new allAuthGuard([new authGuard(), new GoogleAuthGuard()]),
+    AdminGuard,
+  )
+  @Mutation(() => User)
+  async approveMembers(@Args('id') id: string) {
+    return await this.usersService.approveMembers(id);
   }
   @Query(() => String)
   hello(): string {

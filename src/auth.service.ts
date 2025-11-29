@@ -23,7 +23,10 @@ export class AuthService {
     private readonly userService: UsersService,
   ) {}
   async createUser(body: CreateUserInput) {
-    const { email, firstName, lastName, password } = body;
+    const { email, firstName, lastName, password, role } = body;
+    console.log('auth.createUser body ->', body);
+
+    console.log(body);
     const foundedUser = await this.userService.find(email);
     if (foundedUser.length)
       throw new BadRequestException(
@@ -38,6 +41,7 @@ export class AuthService {
       lastName,
       email,
       finalPasswordHashed,
+      role,
     );
     return newUser;
   }
