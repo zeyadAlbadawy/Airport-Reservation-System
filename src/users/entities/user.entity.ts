@@ -3,6 +3,7 @@ import { MinLength, ValidateIf } from 'class-validator';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Role } from '../enums/roles';
 import { Flight } from 'src/flight/entities/flight.entity';
+import { Booking } from 'src/booking/entities/booking.entity';
 
 @ObjectType()
 @Entity()
@@ -66,10 +67,10 @@ export class User {
   ResponsibleFlights?: Flight[];
 
   // for passenger booked flights
-  @Field(() => [Flight], { nullable: true })
-  @OneToMany(() => Flight, (flight) => flight.bookedByUser, {
+  @Field(() => [Booking], { nullable: true })
+  @OneToMany(() => Booking, (booking) => booking.user, {
     onDelete: 'CASCADE',
     nullable: true,
   })
-  bookedFlights?: Flight[];
+  bookedFlights?: Booking[];
 }

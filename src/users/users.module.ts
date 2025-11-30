@@ -5,10 +5,11 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { AuthService } from 'src/auth.service';
 import { GoogleAuthModule } from './google-auth/google-auth.module';
+import { Flight } from 'src/flight/entities/flight.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Flight]),
     forwardRef(() => GoogleAuthModule),
   ],
   providers: [UsersResolver, UsersService, AuthService],

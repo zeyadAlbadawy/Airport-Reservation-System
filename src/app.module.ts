@@ -14,6 +14,8 @@ import { GoogleAuthModule } from './users/google-auth/google-auth.module';
 import { PassportModule } from '@nestjs/passport';
 import { FlightModule } from './flight/flight.module';
 import { Flight } from './flight/entities/flight.entity';
+import { BookingModule } from './booking/booking.module';
+import { Booking } from './booking/entities/booking.entity';
 
 @Module({
   imports: [
@@ -60,7 +62,7 @@ import { Flight } from './flight/entities/flight.entity';
           username: configService.get<string>('DB_USER_NAME'),
           password: configService.get<string>('DB_PASSWORD'),
           database: 'airport_app',
-          entities: [User, Flight],
+          entities: [User, Flight, Booking],
           synchronize: true, // Be cautious about using synchronize in production
           logging: true,
         };
@@ -68,6 +70,8 @@ import { Flight } from './flight/entities/flight.entity';
     }),
 
     GoogleAuthModule,
+
+    BookingModule,
   ],
   // controllers: [AppController],
   providers: [UsersResolver],

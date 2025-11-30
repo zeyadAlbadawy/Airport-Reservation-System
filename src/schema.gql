@@ -2,6 +2,19 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Booking {
+  id: ID!
+  user: User!
+  flight: Flight!
+  seat: String
+  createdAt: DateTime!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 type Flight {
   id: ID!
   flightNumber: Int!
@@ -13,7 +26,7 @@ type Flight {
   airLine: String!
   availableSeats: Int!
   responsibleUser: User
-  bookedByUser: User
+  bookings: [Booking!]
 }
 
 type User {
@@ -30,7 +43,7 @@ type User {
   employeeID: String
   approved: Boolean!
   ResponsibleFlights: [Flight!]
-  bookedFlights: [Flight!]
+  bookedFlights: [Booking!]
 }
 
 """Available user roles"""
@@ -40,11 +53,6 @@ enum Role {
   CREW
   SECURITY
 }
-
-"""
-A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
-"""
-scalar DateTime
 
 type forgetPasswordResponse {
   message: String!
@@ -60,6 +68,10 @@ type FlightPaginationResponse {
   lastPage: Float!
   currentPage: Float!
   perPage: Float!
+}
+
+type responseMessage {
+  message: String!
 }
 
 type Query {
@@ -98,6 +110,8 @@ type Mutation {
   createFlight(CreateFlightInput: CreateFlightInput!): Flight!
   updateFlight(id: String!, UpdateFlightInput: UpdateFlightInput!): Flight!
   removeFlight(id: String!): FlightResponse!
+  createBooking(createBooking: CreateBooking!): Booking!
+  cancelBooking(cancelBooking: CancelBooking!): responseMessage!
 }
 
 input CreateUserInput {
@@ -149,4 +163,13 @@ input UpdateFlightInput {
   arrivalTime: String
   airLine: String
   availableSeats: Int
+}
+
+input CreateBooking {
+  flight: String!
+  seat: String
+}
+
+input CancelBooking {
+  bookingId: String!
 }

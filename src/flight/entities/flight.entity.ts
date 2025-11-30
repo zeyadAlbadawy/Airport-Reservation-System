@@ -1,6 +1,13 @@
 import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
+import { Booking } from 'src/booking/entities/booking.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @ObjectType()
 @Entity()
@@ -51,10 +58,10 @@ export class Flight {
 
   // For the passenger Booked Flights
 
-  @ManyToOne(() => User, (user) => user.bookedFlights, {
-    onDelete: 'CASCADE',
+  @Field(() => [Booking], { nullable: true })
+  @OneToMany(() => Booking, (booking) => booking.flight, {
     nullable: true,
+    onDelete: 'CASCADE',
   })
-  @Field(() => User, { nullable: true })
-  bookedByUser?: User;
+  bookings?: Booking[];
 }
