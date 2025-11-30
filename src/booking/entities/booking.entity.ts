@@ -1,7 +1,13 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Flight } from 'src/flight/entities/flight.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @ObjectType()
 @Entity()
@@ -11,6 +17,7 @@ export class Booking {
   id: string;
 
   @Field(() => User)
+  @JoinColumn({ name: 'userId' })
   @ManyToOne(() => User, (user) => user.bookedFlights, {
     nullable: true,
     onDelete: 'CASCADE',
@@ -18,11 +25,21 @@ export class Booking {
   user: User;
 
   @Field(() => Flight)
+  @JoinColumn({ name: 'flightId' })
   @ManyToOne(() => Flight, (flight) => flight.bookings, {
     nullable: true,
     onDelete: 'CASCADE',
   })
   flight: Flight;
+
+  // Foreign key column for DataLoader
+  @Column()
+  @Field()
+  userId: string;
+
+  @Column()
+  @Field()
+  flightId: string;
 
   @Field(() => String, { nullable: true })
   @Column()

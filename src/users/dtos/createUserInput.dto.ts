@@ -36,6 +36,6 @@ export class CreateUserInput {
 
   // Additional details for stuff
   @ValidateIf((o) => [Role.CREW, Role.SECURITY].includes(o.role))
-  @Field(() => String, { nullable: false })
+  @Field(() => String, { nullable: true })
   employeeID: string | null;
 }
