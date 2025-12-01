@@ -27,7 +27,7 @@ type Flight {
   arrivalTime: String!
   airLine: String!
   availableSeats: Int!
-  responsibleUser: User
+  responsibleBy: User
   bookings: [Booking!]
 }
 
@@ -80,6 +80,7 @@ type Query {
   forgetPassword(resetPasswordDto: resetPasswordDto!): forgetPasswordResponse!
   hello: String!
   flights(flightFilter: FlightFilterDto!): FlightPaginationResponse!
+  myAssignedFlights: [Flight!]!
 }
 
 input resetPasswordDto {
@@ -112,6 +113,8 @@ type Mutation {
   createFlight(CreateFlightInput: CreateFlightInput!): Flight!
   updateFlight(id: String!, UpdateFlightInput: UpdateFlightInput!): Flight!
   removeFlight(id: String!): FlightResponse!
+  assignFlight(assignflight: FlightAssign!): Flight!
+  unAssignFlight(assignflight: FlightAssign!): Flight!
   createBooking(createBooking: CreateBooking!): Booking!
   cancelBooking(cancelBooking: CancelBooking!): responseMessage!
 }
@@ -165,6 +168,11 @@ input UpdateFlightInput {
   arrivalTime: String
   airLine: String
   availableSeats: Int
+}
+
+input FlightAssign {
+  flightId: String!
+  userId: String!
 }
 
 input CreateBooking {

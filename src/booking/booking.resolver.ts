@@ -21,6 +21,7 @@ import { User } from 'src/users/entities/user.entity';
 import { UserDataLoader } from 'src/users/loaders/user.loader';
 import { FlightDataLoader } from 'src/flight/loaders/flight.loader';
 import { Flight } from 'src/flight/entities/flight.entity';
+import { rolesRestrict } from 'src/flight/guards/roles.restrict.guard';
 
 @UseGuards(new allAuthGuard([new authGuard(), new GoogleAuthGuard()]))
 @Resolver(() => Booking)
@@ -32,6 +33,7 @@ export class BookingResolver {
   ) {}
 
   @Mutation(() => Booking)
+  @UseGuards(rolesRestrict('USER'))
   createBooking(
     @currentUser() user: string,
     @Args('createBooking') bookingBody: CreateBooking,
@@ -40,6 +42,7 @@ export class BookingResolver {
   }
 
   @Mutation(() => responseMessage)
+  @UseGuards(rolesRestrict('USER'))
   cancelBooking(
     @currentUser() user: string,
     @Args('cancelBooking') cancelBody: CancelBooking,

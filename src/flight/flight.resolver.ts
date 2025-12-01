@@ -11,10 +11,20 @@ import { UpdateFlightInput } from './dto/update-flight.input';
 import { FlightResponse } from './dto/flight.response.dto';
 import { FlightFilterDto } from './dto/filter-flight.input.dto';
 import { FlightPaginationResponse } from './dto/Flight-pagination-respnse.dto';
+import { AdminGuard } from 'src/users/guards/adminAuth.guard';
+import { currentUser } from 'src/users/decorators/current-user.decorator';
+import { User } from 'src/users/entities/user.entity';
+import { StaffService } from './staff.service';
+import { FlightAssign } from './dto/assign-flight.input';
+import { rolesRestrict } from './guards/roles.restrict.guard';
+import { Role } from 'src/users/enums/roles';
 
 @Resolver(() => Flight)
 export class FlightResolver {
-  constructor(private readonly flightService: FlightService) {}
+  constructor(
+    private readonly flightService: FlightService,
+    private readonly staffService: StaffService,
+  ) {}
 
   // Restrict this action to ADMIN AND CREW
   @UseGuards(
@@ -54,5 +64,27 @@ export class FlightResolver {
   @Query(() => FlightPaginationResponse)
   async flights(@Args('flightFilter') flightFilterInput: FlightFilterDto) {
     return await this.flightService.retriveFlights(flightFilterInput);
+  }
+
+  @Mutation(() => Flight)
+  @UseGuards(AdminGuard)
+  async assignFlight(@Args('assignflight') assignBody: FlightAssign) {
+    return await this.staffService.assignFlightTo(assignBody);
+  }
+
+  @Mutation(() => Flight)
+  @UseGuards(AdminGuard)
+  async unAssignFlight(@Args('assignflight') assignBody: FlightAssign) {
+    return await this.staffService.removeStaffFromFlight(assignBody);
+  }
+
+  @UseGuards(
+    new allAuthGuard([new authGuard(), new GoogleAuthGuard()]),
+    FlightRestrict,
+  )
+  @Query(() => [Flight])
+  @UseGuards(rolesRestrict(Role.CREW, Role.SECURITY))
+  async myAssignedFlights(@currentUser() user: string) {
+    return await this.staffService.myAssignedFlights(user);
   }
 }

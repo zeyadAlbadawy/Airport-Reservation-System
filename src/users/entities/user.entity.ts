@@ -60,7 +60,7 @@ export class User {
 
   // For Admin Assign Flights for staff
   @Field(() => [Flight], { nullable: true })
-  @OneToMany(() => Flight, (flight) => flight.responsibleUser, {
+  @OneToMany(() => Flight, (flight) => flight.responsibleBy, {
     onDelete: 'CASCADE',
     nullable: true,
   })

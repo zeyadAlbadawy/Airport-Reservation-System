@@ -28,9 +28,12 @@ export class BookingService {
       where: { id: bookingBody.flight },
     });
     if (!flight)
-      return new NotFoundException(
+      throw new NotFoundException(
         `There is no flight founded with an id of ${bookingBody.flight}`,
       );
+
+    if (!flight.availableSeats)
+      throw new BadRequestException(`No seats available`);
 
     const foundedBooking = await this.bookingRepo.findOne({
       where: {
@@ -45,6 +48,8 @@ export class BookingService {
         `There is another booking with the same flight, try searching for another`,
       );
 
+    flight.availableSeats -= 1;
+    await this.flightRepo.save(flight);
     const newBooking = this.bookingRepo.create({
       user,
       flight,
@@ -66,6 +71,12 @@ export class BookingService {
         `You are not allowed to do this action as it belongs to another user`,
       );
 
-    return await this.bookingRepo.delete(foundedBooking);
+    foundedBooking.flight.availableSeats += 1;
+    await this.flightRepo.save(foundedBooking.flight);
+
+    await this.bookingRepo.delete(foundedBooking);
+    return {
+      message: `booking with an id of ${foundedBooking.id} has been deleted successfully!`,
+    };
   }
 }

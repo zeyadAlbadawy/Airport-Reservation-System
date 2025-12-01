@@ -44,8 +44,8 @@ export class Flight {
   @Field(() => String)
   airLine: string;
 
-  @Column()
-  @Field(() => Int)
+  @Column({ nullable: false, default: 60 })
+  @Field(() => Int, { nullable: false, defaultValue: 60 })
   availableSeats: number;
 
   // Relation must not have colum decorator the oneToMany or manyToOne Is Sufficient
@@ -54,7 +54,7 @@ export class Flight {
     nullable: true,
   })
   @Field(() => User, { nullable: true })
-  responsibleUser?: User;
+  responsibleBy?: User | null;
 
   // For the passenger Booked Flights
 

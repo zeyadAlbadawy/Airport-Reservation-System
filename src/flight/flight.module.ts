@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Flight } from './entities/flight.entity';
 import { UsersService } from 'src/users/users.service';
 import { User } from 'src/users/entities/user.entity';
+import { StaffService } from './staff.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Flight, User])],
-  providers: [FlightResolver, FlightService, UsersService],
+  providers: [FlightResolver, FlightService, UsersService, StaffService],
 })
 export class FlightModule {}
