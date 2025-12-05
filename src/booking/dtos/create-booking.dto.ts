@@ -8,9 +8,9 @@ import { User } from 'src/users/entities/user.entity';
 
 @InputType()
 export class CreateBooking {
-  @Field(() => CreateSeatInput)
+  @Field(() => [CreateSeatInput])
   @IsArray()
   @ValidateNested({ each: true }) // to validate every seat
   @Type(() => CreateSeatInput)
-  seats: Seat[];
+  seats: CreateSeatInput[];
 }

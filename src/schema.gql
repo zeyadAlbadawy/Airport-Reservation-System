@@ -2,13 +2,22 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Seat {
+  seatNo: Float!
+  isAvailable: Boolean!
+  rowNo: Float!
+  flightId: String!
+}
+
 type Booking {
   id: ID!
   user: User!
   flight: Flight!
   userId: String!
   flightId: String!
+  seatId: [String!]!
   createdAt: DateTime!
+  seat: [Seat!]!
 }
 
 """
@@ -80,6 +89,7 @@ type Query {
   hello: String!
   flights(flightFilter: FlightFilterDto!): FlightPaginationResponse!
   myAssignedFlights: [Flight!]!
+  AllSeatsBookings(bookingId: String!): [Seat!]!
 }
 
 input resetPasswordDto {
@@ -175,7 +185,7 @@ input FlightAssign {
 }
 
 input CreateBooking {
-  seats: CreateSeatInput!
+  seats: [CreateSeatInput!]!
 }
 
 input CreateSeatInput {

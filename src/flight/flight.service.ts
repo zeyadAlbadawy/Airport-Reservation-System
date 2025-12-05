@@ -84,4 +84,15 @@ export class FlightService {
       perPage: limit,
     };
   }
+
+  async decreaseSeatNo(noOfSeats: number, flightId: string) {
+    const foundedFlight = await this.flightRepo.findOne({
+      where: { id: flightId },
+    });
+
+    if (!foundedFlight)
+      throw new NotFoundException(`There is no flight with the provided id`);
+    foundedFlight.availableSeats -= noOfSeats;
+    await this.flightRepo.save(foundedFlight);
+  }
 }

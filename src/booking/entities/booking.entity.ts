@@ -43,10 +43,15 @@ export class Booking {
   @Field()
   flightId: string;
 
+  @Column('uuid', { array: true, nullable: true })
+  @Field(() => [String])
+  seatId: string[];
+
   @OneToMany(() => Seat, (seat) => seat.booking, {
     nullable: false,
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'seatId' })
   seat: Seat[];
 
   @Field(() => Date)

@@ -8,7 +8,8 @@ import {
 import { BookingService } from './booking.service';
 import { Booking } from './entities/booking.entity';
 import { CreateBooking } from './dtos/create-booking.dto';
-import { UseGuards } from '@nestjs/common';
+import { Res, UseGuards } from '@nestjs/common';
+import { Query } from '@nestjs/graphql';
 import { allAuthGuard } from 'src/users/guards/allAuth.guard';
 import { AuthGuard } from '@nestjs/passport';
 import { GoogleAuthGuard } from 'src/users/guards/googleAuth.guard';
@@ -23,6 +24,11 @@ import { FlightDataLoader } from 'src/flight/loaders/flight.loader';
 import { Flight } from 'src/flight/entities/flight.entity';
 import { rolesRestrict } from 'src/flight/guards/roles.restrict.guard';
 import { SeatService } from 'src/seat/seat.service';
+import { FlightService } from 'src/flight/flight.service';
+import { Seat } from 'src/seat/entities/seat.entity';
+import { SeatDataLoader } from 'src/seat/loaders/seat.loader';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @UseGuards(new allAuthGuard([new authGuard(), new GoogleAuthGuard()]))
 @Resolver(() => Booking)
@@ -32,6 +38,10 @@ export class BookingResolver {
     private readonly seatService: SeatService,
     private readonly userLoader: UserDataLoader,
     private readonly flightLoader: FlightDataLoader,
+    private readonly flightService: FlightService,
+    private readonly seatLoader: SeatDataLoader,
+    @InjectRepository(Booking)
+    private readonly bookingRepo: Repository<Booking>,
   ) {}
 
   @Mutation(() => Booking)
@@ -42,17 +52,36 @@ export class BookingResolver {
   ) {
     // 1) Create the seats
     // The res is all the seats without the booking associated with them
-    const createdSeats = await Promise.all(
+    const createBooking = await this.bookingService.createBooking(
+      user,
+      bookingBody.seats[0].flightId,
+    );
+
+    await Promise.all(
       bookingBody.seats.map(async (seat) => {
-        return await this.seatService.createSeat(
+        const newCreatedSeat = await this.seatService.createSeat(
           seat.seatNo,
           seat.rowNo,
           seat.flightId,
+          createBooking,
         );
+
+        // createBooking.seatId.push(newCreatedSeat.id);
+        console.log(newCreatedSeat);
+        return newCreatedSeat;
       }),
     );
 
-    return this.bookingService.createBooking(user, createdSeats);
+    return await this.bookingRepo.save(createBooking);
+  }
+
+  @Query(() => [Seat])
+  @UseGuards(rolesRestrict('USER'))
+  AllSeatsBookings(
+    @currentUser() user: string,
+    @Args('bookingId', { type: () => String }) bookingId: string, // add explicit type
+  ) {
+    return this.bookingService.allSeatsBooked(user, bookingId);
   }
 
   @Mutation(() => responseMessage)
@@ -72,5 +101,10 @@ export class BookingResolver {
   @ResolveField(() => Flight)
   async flight(@Parent() booking: Booking) {
     return this.flightLoader.flightLoader.load(booking.flightId);
+  }
+
+  @ResolveField(() => [Seat])
+  async seat(@Parent() Booking: Booking) {
+    return this.seatLoader.seatManyLoader.load(Booking.id);
   }
 }

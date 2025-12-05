@@ -22,14 +22,13 @@ export class BookingService {
     @InjectRepository(Seat) private readonly seatRepo: Repository<Seat>,
   ) {}
 
-  async createBooking(userId: string, seatCreated: Seat[]) {
+  async createBooking(userId: string, flightId: string) {
     // 1) Check if the user exists
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user)
       throw new NotFoundException(`There is no user with an id of ${userId}`);
 
     // 2) All seats must belong to the same flight
-    const flightId = seatCreated[0].flightId;
     const flight = await this.flightRepo.findOne({ where: { id: flightId } });
     if (!flight) throw new NotFoundException(`Flight not found`);
 
@@ -39,55 +38,57 @@ export class BookingService {
         user: { id: userId },
         flight: { id: flightId },
       },
-      relations: ['user', 'flight'],
+      relations: ['user', 'flight', 'seat'],
     });
-
-    console.log(foundedBooking);
-
-    if (foundedBooking)
-      throw new BadRequestException(
-        `You already booked this flight. Cancel your booking first.`,
-      );
 
     const newBooking = this.bookingRepo.create({
       user,
       flight,
       userId,
       flightId,
-      seat: [],
     });
+
+    // the seat no being assigned yet seat: Seat[]
+    // so it is a must at a seat copy to assign it to the booking
 
     // Save booking to generate UUID
     const savedBooking = await this.bookingRepo.save(newBooking);
 
     // Assign the bookiong related each seat to the currently booking
-    seatCreated.forEach((seat) => (seat.booking = savedBooking));
-    await this.seatRepo.save(seatCreated);
-
-    flight.availableSeats -= seatCreated.length;
-    await this.flightRepo.save(flight);
     return savedBooking;
   }
 
-  async cancelBooking(userId: string, flightId: string) {
-    const foundedBooking = await this.bookingRepo.findOne({
+  async allSeatsBooked(userId: string, bookingId: string) {
+    const bookingFound = await this.bookingRepo.findOne({
       where: {
-        id: flightId,
+        userId: userId,
+        id: bookingId,
       },
-      relations: ['user', 'flight'],
+      relations: ['user', 'seat'],
     });
 
-    if (foundedBooking?.user.id !== userId)
-      throw new UnauthorizedException(
-        `You are not allowed to do this action as it belongs to another user`,
-      );
+    if (!bookingFound)
+      throw new NotFoundException(`There is no booking with the provided id`);
 
-    foundedBooking.flight.availableSeats += 1;
-    await this.flightRepo.save(foundedBooking.flight);
+    return bookingFound.seat;
+  }
 
-    await this.bookingRepo.delete(foundedBooking);
-    return {
-      message: `booking with an id of ${foundedBooking.id} has been deleted successfully!`,
-    };
+  async cancelBooking(userId: string, flightId: string) {
+    // const foundedBooking = await this.bookingRepo.findOne({
+    //   where: {
+    //     id: flightId,
+    //   },
+    //   relations: ['user', 'flight'],
+    // });
+    // if (foundedBooking?.user.id !== userId)
+    //   throw new UnauthorizedException(
+    //     `You are not allowed to do this action as it belongs to another user`,
+    //   );
+    // foundedBooking.flight.availableSeats += 1;
+    // await this.flightRepo.save(foundedBooking.flight);
+    // await this.bookingRepo.delete(foundedBooking);
+    // return {
+    //   message: `booking with an id of ${foundedBooking.id} has been deleted successfully!`,
+    // };
   }
 }

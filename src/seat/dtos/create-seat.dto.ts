@@ -8,7 +8,7 @@ export class CreateSeatInput {
   rowNo: number;
 
   @Field()
-  @IsString()
+  @IsInt()
   seatNo: number;
 
   @Field()
