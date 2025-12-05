@@ -16,6 +16,8 @@ import { FlightModule } from './flight/flight.module';
 import { Flight } from './flight/entities/flight.entity';
 import { BookingModule } from './booking/booking.module';
 import { Booking } from './booking/entities/booking.entity';
+import { Seat } from 'src/seat/entities/seat.entity';
+import { SeatModule } from './seat/seat.module';
 
 @Module({
   imports: [
@@ -62,7 +64,7 @@ import { Booking } from './booking/entities/booking.entity';
           username: configService.get<string>('DB_USER_NAME'),
           password: configService.get<string>('DB_PASSWORD'),
           database: 'airport_app',
-          entities: [User, Flight, Booking],
+          entities: [User, Flight, Booking, Seat],
           synchronize: true, // Be cautious about using synchronize in production
           logging: true,
         };
@@ -72,6 +74,8 @@ import { Booking } from './booking/entities/booking.entity';
     GoogleAuthModule,
 
     BookingModule,
+
+    SeatModule,
   ],
   // controllers: [AppController],
   providers: [UsersResolver],

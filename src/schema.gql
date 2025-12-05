@@ -8,7 +8,6 @@ type Booking {
   flight: Flight!
   userId: String!
   flightId: String!
-  seat: String
   createdAt: DateTime!
 }
 
@@ -176,8 +175,13 @@ input FlightAssign {
 }
 
 input CreateBooking {
-  flight: String!
-  seat: String
+  seats: CreateSeatInput!
+}
+
+input CreateSeatInput {
+  rowNo: Float!
+  seatNo: Float!
+  flightId: String!
 }
 
 input CancelBooking {

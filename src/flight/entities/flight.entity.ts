@@ -57,7 +57,6 @@ export class Flight {
   responsibleBy?: User | null;
 
   // For the passenger Booked Flights
-
   @Field(() => [Booking], { nullable: true })
   @OneToMany(() => Booking, (booking) => booking.flight, {
     nullable: true,

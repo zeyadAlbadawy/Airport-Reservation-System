@@ -8,12 +8,15 @@ import { User } from 'src/users/entities/user.entity';
 import { Flight } from 'src/flight/entities/flight.entity';
 import { UserDataLoader } from 'src/users/loaders/user.loader';
 import { FlightDataLoader } from 'src/flight/loaders/flight.loader';
+import { Seat } from 'src/seat/entities/seat.entity';
+import { SeatService } from 'src/seat/seat.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Booking, User, Flight])],
+  imports: [TypeOrmModule.forFeature([Booking, User, Flight, Seat])],
   providers: [
     BookingResolver,
     BookingService,
+    SeatService,
     UsersService,
     UserDataLoader,
     FlightDataLoader,

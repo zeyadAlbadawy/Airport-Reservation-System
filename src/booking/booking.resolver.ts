@@ -22,23 +22,37 @@ import { UserDataLoader } from 'src/users/loaders/user.loader';
 import { FlightDataLoader } from 'src/flight/loaders/flight.loader';
 import { Flight } from 'src/flight/entities/flight.entity';
 import { rolesRestrict } from 'src/flight/guards/roles.restrict.guard';
+import { SeatService } from 'src/seat/seat.service';
 
 @UseGuards(new allAuthGuard([new authGuard(), new GoogleAuthGuard()]))
 @Resolver(() => Booking)
 export class BookingResolver {
   constructor(
     private readonly bookingService: BookingService,
+    private readonly seatService: SeatService,
     private readonly userLoader: UserDataLoader,
     private readonly flightLoader: FlightDataLoader,
   ) {}
 
   @Mutation(() => Booking)
   @UseGuards(rolesRestrict('USER'))
-  createBooking(
+  async createBooking(
     @currentUser() user: string,
     @Args('createBooking') bookingBody: CreateBooking,
   ) {
-    return this.bookingService.createBooking(user, bookingBody);
+    // 1) Create the seats
+    // The res is all the seats without the booking associated with them
+    const createdSeats = await Promise.all(
+      bookingBody.seats.map(async (seat) => {
+        return await this.seatService.createSeat(
+          seat.seatNo,
+          seat.rowNo,
+          seat.flightId,
+        );
+      }),
+    );
+
+    return this.bookingService.createBooking(user, createdSeats);
   }
 
   @Mutation(() => responseMessage)

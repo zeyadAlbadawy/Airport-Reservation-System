@@ -1,11 +1,13 @@
 import { Field, ID, ObjectType } from '@nestjs/graphql';
 import { Flight } from 'src/flight/entities/flight.entity';
 import { User } from 'src/users/entities/user.entity';
+import { Seat } from 'src/seat/entities/seat.entity';
 import {
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -41,9 +43,11 @@ export class Booking {
   @Field()
   flightId: string;
 
-  @Field(() => String, { nullable: true })
-  @Column()
-  seat?: string;
+  @OneToMany(() => Seat, (seat) => seat.booking, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  seat: Seat[];
 
   @Field(() => Date)
   @Column({ default: new Date(Date.now()) })

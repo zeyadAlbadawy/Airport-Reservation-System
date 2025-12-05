@@ -10,6 +10,7 @@ import { Repository } from 'typeorm';
 import { CreateBooking } from './dtos/create-booking.dto';
 import { User } from 'src/users/entities/user.entity';
 import { Flight } from 'src/flight/entities/flight.entity';
+import { Seat } from 'src/seat/entities/seat.entity';
 
 @Injectable()
 export class BookingService {
@@ -18,44 +19,54 @@ export class BookingService {
     private readonly bookingRepo: Repository<Booking>,
     @InjectRepository(User) private readonly userRepo: Repository<User>,
     @InjectRepository(Flight) private readonly flightRepo: Repository<Flight>,
+    @InjectRepository(Seat) private readonly seatRepo: Repository<Seat>,
   ) {}
 
-  async createBooking(userId: string, bookingBody: CreateBooking) {
+  async createBooking(userId: string, seatCreated: Seat[]) {
+    // 1) Check if the user exists
     const user = await this.userRepo.findOne({ where: { id: userId } });
     if (!user)
       throw new NotFoundException(`There is no user with an id of ${userId}`);
-    const flight = await this.flightRepo.findOne({
-      where: { id: bookingBody.flight },
-    });
-    if (!flight)
-      throw new NotFoundException(
-        `There is no flight founded with an id of ${bookingBody.flight}`,
-      );
 
-    if (!flight.availableSeats)
-      throw new BadRequestException(`No seats available`);
+    // 2) All seats must belong to the same flight
+    const flightId = seatCreated[0].flightId;
+    const flight = await this.flightRepo.findOne({ where: { id: flightId } });
+    if (!flight) throw new NotFoundException(`Flight not found`);
 
+    // 3) Check if user already booked this flight
     const foundedBooking = await this.bookingRepo.findOne({
       where: {
         user: { id: userId },
-        flight: { id: bookingBody.flight },
+        flight: { id: flightId },
       },
-      relations: ['flight', 'user'],
+      relations: ['user', 'flight'],
     });
 
+    console.log(foundedBooking);
+
     if (foundedBooking)
-      return new BadRequestException(
-        `There is another booking with the same flight, try searching for another`,
+      throw new BadRequestException(
+        `You already booked this flight. Cancel your booking first.`,
       );
 
-    flight.availableSeats -= 1;
-    await this.flightRepo.save(flight);
     const newBooking = this.bookingRepo.create({
       user,
       flight,
-      seat: bookingBody.seat,
+      userId,
+      flightId,
+      seat: [],
     });
-    return await this.bookingRepo.save(newBooking);
+
+    // Save booking to generate UUID
+    const savedBooking = await this.bookingRepo.save(newBooking);
+
+    // Assign the bookiong related each seat to the currently booking
+    seatCreated.forEach((seat) => (seat.booking = savedBooking));
+    await this.seatRepo.save(seatCreated);
+
+    flight.availableSeats -= seatCreated.length;
+    await this.flightRepo.save(flight);
+    return savedBooking;
   }
 
   async cancelBooking(userId: string, flightId: string) {
