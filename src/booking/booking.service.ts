@@ -11,6 +11,7 @@ import { CreateBooking } from './dtos/create-booking.dto';
 import { User } from 'src/users/entities/user.entity';
 import { Flight } from 'src/flight/entities/flight.entity';
 import { Seat } from 'src/seat/entities/seat.entity';
+import { use } from 'passport';
 
 @Injectable()
 export class BookingService {
@@ -38,8 +39,9 @@ export class BookingService {
         user: { id: userId },
         flight: { id: flightId },
       },
-      relations: ['user', 'flight', 'seat'],
+      // relations: ['user', 'flight', 'seat'],
     });
+    console.log(foundedBooking);
 
     const newBooking = this.bookingRepo.create({
       user,
@@ -73,22 +75,23 @@ export class BookingService {
     return bookingFound.seat;
   }
 
-  async cancelBooking(userId: string, flightId: string) {
-    // const foundedBooking = await this.bookingRepo.findOne({
-    //   where: {
-    //     id: flightId,
-    //   },
-    //   relations: ['user', 'flight'],
-    // });
-    // if (foundedBooking?.user.id !== userId)
-    //   throw new UnauthorizedException(
-    //     `You are not allowed to do this action as it belongs to another user`,
-    //   );
-    // foundedBooking.flight.availableSeats += 1;
-    // await this.flightRepo.save(foundedBooking.flight);
-    // await this.bookingRepo.delete(foundedBooking);
-    // return {
-    //   message: `booking with an id of ${foundedBooking.id} has been deleted successfully!`,
-    // };
+  async cancelBooking(userId: string, bookingId: string) {
+    const foundedBooking = await this.bookingRepo.findOne({
+      where: {
+        id: bookingId,
+        user: { id: userId },
+      },
+      relations: ['user', 'flight', 'seat'],
+    });
+    if (!foundedBooking)
+      throw new UnauthorizedException(
+        `There is no booking with the provided id or it belongs to a different user!`,
+      );
+    foundedBooking.flight.availableSeats += foundedBooking.seat.length;
+    await this.flightRepo.save(foundedBooking.flight);
+    await this.bookingRepo.delete(foundedBooking.id);
+    return {
+      message: `booking with an id of ${foundedBooking.id} has been deleted successfully!`,
+    };
   }
 }
