@@ -1,3 +1,19 @@
+Airport Booking & Management System (NestJS)
+
+A full-featured airport booking and management application built with NestJS and GraphQL, designed to efficiently handle flight schedules, seat reservations, and user management. Key features include:
+
+Flight & Booking Management: Create, update, and query flights and bookings with real-time seat availability.
+
+User Authentication & Authorization: Role-based access control for admins, staff, and passengers.
+
+Optimized Data Fetching: Uses DataLoader to batch and cache GraphQL queries, reducing redundant database calls and improving performance.
+
+Asynchronous Job Processing: Integrates BullMQ for message queuing and background tasks, such as booking notifications, alerts, and processing large data operations.
+
+Scalable Architecture: Modular NestJS design ensures maintainability and easy expansion of features.
+
+This system provides a robust foundation for airport operations, combining efficient backend performance with scalable asynchronous workflows.
+
 #### ** Example GraphQL Queries**
 
 ```mutation LoginUser($loginUserInput: LoginUserInput!) {
