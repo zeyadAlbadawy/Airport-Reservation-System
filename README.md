@@ -2,6 +2,8 @@
 
 The Airport App is a full-featured flight and booking management system built with NestJS, GraphQL, MongoDB, and Redis/BullMQ. It serves both administrative staff (admins, crew, security) and users (passengers or employees) for managing flights, bookings, and related operations.
 
+![alt text](<Untitled (2).png>)
+
 ## **Core Modules & Features**
 
 ### User Management
