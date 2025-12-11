@@ -2,7 +2,7 @@
 
 The Airport App is a full-featured flight and booking management system built with NestJS, GraphQL, MongoDB, and Redis/BullMQ. It serves both administrative staff (admins, crew, security) and users (passengers or employees) for managing flights, bookings, and related operations.
 
-![alt text](<Untitled (2).png>)
+![alt text](<Untitled (2)-1.png>)
 
 ## **Core Modules & Features**
 
@@ -162,7 +162,7 @@ type User {
 
 Represents a flight.
 
-```
+```graphql
 type Flight {
   id: ID!
   flightNumber: Int!
@@ -176,14 +176,13 @@ type Flight {
   responsibleBy: User
   bookings: [Booking!]
 }
-
 ```
 
 #### **Booking**
 
 Represents a booking.
 
-```
+```graphql
 type Booking {
   id: ID!
   user: User!
@@ -200,21 +199,24 @@ type Booking {
 
 Represents a seat on a flight.
 
-```
+```graphql
 type Seat {
   seatNo: Float!
   isAvailable: Boolean!
   rowNo: Float!
   flightId: String!
 }
-
 ```
 
 ## Response Types
 
-```
-type forgetPasswordResponse { message: String! }
-type FlightResponse { message: String! }
+```graphql
+type forgetPasswordResponse {
+  message: String!
+}
+type FlightResponse {
+  message: String!
+}
 type FlightPaginationResponse {
   flights: [Flight!]
   total: Float!
@@ -222,15 +224,16 @@ type FlightPaginationResponse {
   currentPage: Float!
   perPage: Float!
 }
-type responseMessage { message: String! }
-
+type responseMessage {
+  message: String!
+}
 ```
 
 ### Inputs
 
 #### User Inputs
 
-```
+```graphql
 input CreateUserInput {
   role: Role!
   firstName: String!
@@ -256,7 +259,7 @@ input UpdateUserInput {
 
 #### Flight Inputs
 
-```
+```graphql
 input CreateFlightInput {
   flightNumber: Int!
   departureAirport: String!
@@ -293,12 +296,11 @@ input FlightFilterDto {
   airLine: String
   date: String!
 }
-
 ```
 
 #### Booking Inputs
 
-```
+```graphql
 input CreateBooking {
   seats: [CreateSeatInput!]!
 }
@@ -316,7 +318,7 @@ input CancelBooking {
 
 #### Auth/Password Inputs
 
-```
+```graphql
 input resetPasswordDto {
   email: String!
   password: String!
@@ -329,7 +331,7 @@ input resetPasswordDto {
 
 Retrieve a paginated list of flights.
 
-```
+```graphql
 query Flights($flightFilter: FlightFilterDto!) {
   flights(flightFilter: $flightFilter) {
     flights {
@@ -355,7 +357,7 @@ query Flights($flightFilter: FlightFilterDto!) {
 
 Get all flights assigned to the logged-in user.
 
-```
+```graphql
 query MyAssignedFlights {
   myAssignedFlights {
     id
@@ -369,14 +371,13 @@ query MyAssignedFlights {
     availableSeats
   }
 }
-
 ```
 
 #### AllSeatsBookings
 
 Get all seats for a specific booking.
 
-```
+```graphql
 query AllSeatsBookings($bookingId: String!) {
   AllSeatsBookings(bookingId: $bookingId) {
     seatNo
@@ -391,7 +392,7 @@ query AllSeatsBookings($bookingId: String!) {
 
 Send a reset password email.
 
-```
+```graphql
 query ForgetPassword($resetPasswordDto: resetPasswordDto!) {
   forgetPassword(resetPasswordDto: $resetPasswordDto) {
     message
@@ -405,7 +406,7 @@ query ForgetPassword($resetPasswordDto: resetPasswordDto!) {
 
 signupUser
 
-```
+```graphql
 mutation SignupUser($createUserInput: CreateUserInput!) {
   signupUser(createUserInput: $createUserInput) {
     id
@@ -422,7 +423,7 @@ mutation SignupUser($createUserInput: CreateUserInput!) {
 
 loginUser
 
-```
+```graphql
 mutation LoginUser($LoginUserInput: LoginUserInput!) {
   loginUser(LoginUserInput: $LoginUserInput) {
     id
@@ -436,7 +437,7 @@ mutation LoginUser($LoginUserInput: LoginUserInput!) {
 
 updateUserInfo
 
-```
+```graphql
 mutation UpdateUserInfo($UpdateUserInput: UpdateUserInput!, $id: String!) {
   updateUserInfo(UpdateUserInput: $UpdateUserInput, id: $id) {
     id
@@ -449,7 +450,7 @@ mutation UpdateUserInfo($UpdateUserInput: UpdateUserInput!, $id: String!) {
 
 logoutUser
 
-```
+```graphql
 mutation LogoutUser($id: String!) {
   logoutUser(id: $id)
 }
@@ -457,7 +458,7 @@ mutation LogoutUser($id: String!) {
 
 resetPassword
 
-```
+```graphql
 mutation ResetPassword($forgetPassword: forgetPasswordDto!, $token: String!) {
   resetPassword(forgetPassword: $forgetPassword, token: $token) {
     message
@@ -467,7 +468,7 @@ mutation ResetPassword($forgetPassword: forgetPasswordDto!, $token: String!) {
 
 approveMembers
 
-```
+```graphql
 mutation ApproveMembers($id: String!) {
   approveMembers(id: $id) {
     id
@@ -480,7 +481,7 @@ mutation ApproveMembers($id: String!) {
 
 createFlight
 
-```
+```graphql
 mutation CreateFlight($CreateFlightInput: CreateFlightInput!) {
   createFlight(CreateFlightInput: $CreateFlightInput) {
     id
@@ -498,7 +499,7 @@ mutation CreateFlight($CreateFlightInput: CreateFlightInput!) {
 
 updateFlight
 
-```
+```graphql
 mutation UpdateFlight($id: String!, $UpdateFlightInput: UpdateFlightInput!) {
   updateFlight(id: $id, UpdateFlightInput: $UpdateFlightInput) {
     id
@@ -516,7 +517,7 @@ mutation UpdateFlight($id: String!, $UpdateFlightInput: UpdateFlightInput!) {
 
 removeFlight
 
-```
+```graphql
 mutation RemoveFlight($id: String!) {
   removeFlight(id: $id) {
     message
@@ -526,7 +527,7 @@ mutation RemoveFlight($id: String!) {
 
 assignFlight
 
-```
+```graphql
 mutation AssignFlight($assignflight: FlightAssign!) {
   assignFlight(assignflight: $assignflight) {
     id
@@ -542,7 +543,7 @@ mutation AssignFlight($assignflight: FlightAssign!) {
 
 unAssignFlight
 
-```
+```graphql
 mutation UnAssignFlight($assignflight: FlightAssign!) {
   unAssignFlight(assignflight: $assignflight) {
     id
@@ -560,7 +561,7 @@ mutation UnAssignFlight($assignflight: FlightAssign!) {
 
 createBooking
 
-```
+```graphql
 mutation CreateBooking($createBooking: CreateBooking!) {
   createBooking(createBooking: $createBooking) {
     id
@@ -589,7 +590,7 @@ mutation CreateBooking($createBooking: CreateBooking!) {
 
 cancelBooking
 
-```
+```graphql
 mutation CancelBooking($cancelBooking: CancelBooking!) {
   cancelBooking(cancelBooking: $cancelBooking) {
     message
