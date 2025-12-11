@@ -18,9 +18,21 @@ import { BookingModule } from './booking/booking.module';
 import { Booking } from './booking/entities/booking.entity';
 import { Seat } from 'src/seat/entities/seat.entity';
 import { SeatModule } from './seat/seat.module';
+import { BullModule } from '@nestjs/bullmq';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
+    BullModule.forRoot({
+      connection: { host: 'localhost', port: 6379 },
+      defaultJobOptions: {
+        attempts: 2, // if a job fails, try other two times
+        removeOnComplete: 1000,
+        removeOnFail: 3000,
+        backoff: 2000, // if a job fails, wait at least 2s before giving another retry
+      },
+    }),
     UsersModule,
     PassportModule.register({ session: true }), // to register the session with passport
     MailerModule.forRootAsync({
@@ -74,10 +86,10 @@ import { SeatModule } from './seat/seat.module';
     GoogleAuthModule,
 
     BookingModule,
-
+    UsersModule,
     SeatModule,
   ],
   // controllers: [AppController],
-  providers: [UsersResolver],
+  providers: [],
 })
 export class AppModule {}

@@ -12,15 +12,21 @@ import { Seat } from 'src/seat/entities/seat.entity';
 import { SeatService } from 'src/seat/seat.service';
 import { FlightService } from 'src/flight/flight.service';
 import { SeatDataLoader } from 'src/seat/loaders/seat.loader';
+import { SendGridService } from 'src/users/send-grid.service';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Booking, User, Flight, Seat])],
+  imports: [
+    TypeOrmModule.forFeature([Booking, User, Flight, Seat]),
+    BullModule.registerQueue({ name: 'email' }),
+  ],
   providers: [
     BookingResolver,
     FlightService,
     BookingService,
     SeatService,
     UsersService,
+    SendGridService,
     UserDataLoader,
     FlightDataLoader,
     SeatDataLoader,

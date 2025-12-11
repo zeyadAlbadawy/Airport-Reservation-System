@@ -29,6 +29,10 @@ import { Seat } from 'src/seat/entities/seat.entity';
 import { SeatDataLoader } from 'src/seat/loaders/seat.loader';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { UsersService } from 'src/users/users.service';
+import { SendGridService } from 'src/users/send-grid.service';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @UseGuards(new allAuthGuard([new authGuard(), new GoogleAuthGuard()]))
 @Resolver(() => Booking)
@@ -40,8 +44,11 @@ export class BookingResolver {
     private readonly flightLoader: FlightDataLoader,
     private readonly flightService: FlightService,
     private readonly seatLoader: SeatDataLoader,
+    private readonly sendGridService: SendGridService,
+    // private readonly userService: UsersService,
     @InjectRepository(Booking)
     private readonly bookingRepo: Repository<Booking>,
+    @InjectQueue('email') private readonly emailQueue: Queue,
   ) {}
 
   @Mutation(() => Booking)
@@ -67,11 +74,22 @@ export class BookingResolver {
         );
 
         // createBooking.seatId.push(newCreatedSeat.id);
-        console.log(newCreatedSeat);
+        // console.log(newCreatedSeat);
         return newCreatedSeat;
       }),
     );
 
+    // Mail to the client after make a booking
+
+    console.log(createBooking);
+    // REAL MAIL SENDING
+    // Will be Disabled
+    await this.sendGridService.send({
+      to: createBooking.user.email,
+      subject: 'You booking have been confirmed',
+      from: 'zeyadalbadawyamm@gmail.com', // Fill it with your validated email on SendGrid account
+      text: `booking flight from ${createBooking.flight.departureAirport} to ${createBooking.flight.destinationAirport} has been booked successfully`,
+    });
     return await this.bookingRepo.save(createBooking);
   }
 

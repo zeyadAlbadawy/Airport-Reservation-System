@@ -13,10 +13,13 @@ import { allAuthGuard } from './guards/allAuth.guard';
 import { GoogleAuthGuard } from './guards/googleAuth.guard';
 import { authGuard } from './guards/auth.guard';
 import { AdminGuard } from './guards/adminAuth.guard';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Resolver(() => User)
 export class UsersResolver {
   constructor(
+    @InjectQueue('email') private readonly emailQueue: Queue,
     private readonly usersService: UsersService,
     private readonly authService: AuthService,
   ) {}
@@ -66,11 +69,18 @@ export class UsersResolver {
   async forgetPassword(
     @Args('resetPasswordDto') resetPasswordBody: resetPasswordDto,
   ) {
+    // 1) Generate the random token in the server side
     const token = await this.authService.generateRandomToken(
       resetPasswordBody.email,
     );
 
-    await this.usersService.sendMail(token, resetPasswordBody.email);
+    // 2) Register the email sending to the queue => Creating job in the queue which is responisble for sending mails
+    await this.emailQueue.add('sending-token-mailtrap', {
+      email: resetPasswordBody.email,
+      token,
+    });
+
+    // The sending mail  logic can be handeled on the queue side
     return {
       message: 'Token Sent Successfully to your email, please check that',
     };
